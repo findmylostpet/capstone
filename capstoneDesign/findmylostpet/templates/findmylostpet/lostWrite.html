@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- https://nowonbun.tistory.com/538 모달-->
+<!-- image preview scripts-->
+<script>
+  function preview_images() {
+    $('#photo_preview').text(""); //전에 입력된 html 초기화
+
+    var total_file = document.getElementById("photo").files.length;
+
+    for (var i = 0; i < total_file; i++) {
+      $('#photo_preview').append("<div class='col-lg-4 col-sm-6 col-xs-6 mb-2'><div class='card btn-outline-light'> <img class='card-img-top mx-auto' src='" + URL.createObjectURL(event.target.files[i]) + "' style=\"height:200px;\"></div></div>");
+    }
+  }
+</script>
+
+
+<script>
+  //로딩화면
+  function showModal() {
+    console.log("SHOW");
+    $("#myModal").show();
+  }
+</script>
+
+<div class="py-2">
+  <div class="container">
+    <div class="row">
+      <div class="text-center col-md-7 mx-auto" style="height:100px; margin-top: 50px;">
+        <h2>유기견 실종신고</h2>
+        <p class="lead">잃어버린 반려견 정보를 적어주세요</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="order-md-1 col-md-10">
+        <form action="{% url 'lost_create' %}" method="POST" enctype="multipart/form-data" class="needs-validation"
+          novalidate="">
+          {% csrf_token %}
+          <!--
+          <div class="row my-1">
+            <div class="col-12 my-1">
+              <label for="address2" name="sex" id="sex">종</label>
+              <select class="w-100" id="breed" name="breed"></select>
+              <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.9/js/select2.min.js"></script>
+              <script>
+                $('select').select2();
+              </script>
+            </div>
+          </div>
+          -->
+          <div class="row my-1">
+            <div class="col-6 my-1">
+              <label for="name">이름</label>
+              <input type="text" class="form-control" name='name' required id="firstName" placeholder=""
+                value="{{name}}">
+
+              <div class="invalid-feedback"> </div>
+              {% if error_name %}
+              <div class="alert alert-danger my-1">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ error_name }}
+              </div>
+
+              {% endif %}
+
+            </div>
+            <div class="col-6 my-1">
+              <label for="sex" name="sex" id="sex">성별</label>
+              <select class="custom-select d-block w-100" name="sex" id="sex" selected="{{sex}}" required>
+                {% if sex == null %}
+                <option value="">선택해주세요</option>
+                {%else%}
+                <option selected="selected">
+                  {{sex}}
+                </option>
+                {% endif %}
+                <option value="암컷">암컷</option>
+                <option value="수컷">수컷</option>
+                <option value="미상">미상</option>
+
+              </select>
+              {% if error_sex %}
+              <div class="alert alert-danger my-1">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ error_sex }}
+              </div>
+              {% endif %}
+              <script>
+                $("select[name={{sex}}]").val();
+              </script>
+
+            </div>
+          </div>
+          <div class="row my-1">
+            <div class="col-12"> <label for="money">사례금</label>
+              <input type="text" class="form-control" name="gratuity" value="{{gratuity}}" placeholder="-만원"
+                required="false"> </div>
+          </div>
+          <div class="row my-1">
+            <div class="col-12"> <label for="lost_date">날짜</label>
+              <input type="date" name="lost_date" class="form-control" id="lost_date" value="{{pubdate}}">
+            </div>
+            <script>
+              document.getElementById("lost_date").value = new Date().toISOString().substring(0, 10);
+            </script>
+          </div>
+          {% if error_date %}
+          <div class="alert alert-danger my-1">
+            <a class="close" href="#" data-dismiss="alert">×</a>
+            {{ error_date }}
+          </div>
+          {% endif %}
+          <div class="row my-1">
+            <div class="col-4 my-1"><label for="sido">시</label>
+
+              <select class="custom-select d-block w-100" id="sido" name="sido">
+                {% if si == null %}
+                <option value="선택">선택</option>
+                {%else%}
+                <option selected="selected">
+                  {{si}}
+                </option>
+                {% endif %}
+              </select>
+              {% if error_si %}
+              <div class="alert alert-danger my-1">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ error_si }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-4 my-1"> <label for="sigugun">구</label>
+              <select class="custom-select d-block w-100" id="sigugun" name="sigugun">
+                {% if gu == null %}
+                <option value="선택">선택</option>
+                {%else%}
+                <option selected="selected">
+                  {{gu}}
+                </option>
+                {% endif %}
+              </select>
+              {% if error_gu %}
+              <div class="alert alert-danger my-1">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ error_gu }}
+              </div>
+              {% endif %}
+
+            </div>
+            <div class="col-4 my-1"> <label for="dong">동</label>
+              <select class="custom-select d-block w-100" id="dong" name="dong">
+                {% if dong == null %}
+                <option value="선택">선택</option>
+                {%else%}
+                <option selected="selected">
+                  {{dong}}
+                </option>
+                {% endif %}
+              </select>
+              {% if error_dong %}
+              <div class="alert alert-danger my-1">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ error_dong }}
+              </div>
+              {% endif %}
+            </div>
+            <script>
+              $("#searchOption > option[value=" + '<c:out value="${ param.searchOption }"/>' + "]").attr("selected", "selected");
+
+            </script>
+
+
+          </div>
+          <div class="form-group my-2"> <label>특이사항</label>
+            <div class="col-14"><textarea class="form-control" name="note" id="form30" rows="3"
+                placeholder="특이사항을 입력해주세요.">{{note}}</textarea></div>
+          </div>
+          <div class="row my-1">
+            <div class="col-12">
+              <label>사진</label>
+
+              <div class="px-2">
+                <div class="row" id='photo_preview'></div>
+              </div>
+
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="photo" name="photo" onchange="preview_images();"
+                  multiple>
+                <label class="custom-file-label" for="photo">사진 업로드</label>
+                <script>
+                  $('#photo').on('change', function () {
+                    //get the file name
+                    var fileNum = document.getElementById("photo").files.length;
+        
+                    //replace the "Choose a file" label
+                    if (fileNum != 1) {
+                      $(this).next('.custom-file-label').html(fileNum + '개의 파일 선택');
+                    } else {
+                      var fileName = $(this).val();
+                      $(this).next('.custom-file-label').html(fileName);
+                    }
+                  })
+                </script>
+              </div>
+            </div>
+          </div>
+          <div class="row my-1">
+            <div class="col-12 my-2">
+              {% if error %}
+              <div class="alert alert-danger">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ error }}
+              </div>
+              {% endif %}
+              <button class="btn btn-outline-danger btn-lg btn-block my-1" type="submit" id="predict"
+                data-toggle="modal" data-target="#myModal" data-backdrop="static" data-keyboard="false"
+                onclick="showModal();">
+                공고 올리기
+              </button>
+
+
+              <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog my-2" role="document">
+                  <div class="modal-content text-center">
+                    <div class="modal-header">
+                      <h5 class="modal-title"> 종 분석 중...</h5>
+                    </div>
+                    <div class="modal-body my-3" style="text-align: center;">
+                      <div class="spinner-grow text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-secondary fast" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-success" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-danger fast" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-warning" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-info fast" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-light" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-dark fast" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+
+                      <br />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </form>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

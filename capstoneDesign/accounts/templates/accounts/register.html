@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="my-4 pt-3 text-center">
+  <div class="container">
+    <div class="row">
+      <div class="mx-auto">
+        <h1>REGISTER</h1>
+        <p class="mb-3">견 종 인식 <br> 실종동물 찾기 서비스</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-6">
+          <form method="POST" action="{% url 'register'%}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="inputName">아이디</label>
+              <input type="text" class="form-control" name="username" placeholder="이름을 입력해 주세요">
+            </div>
+            <div class="form-group">
+              <label for="InputPassword">비밀번호</label>
+              <input type="password" class="form-control" name="password" placeholder="비밀번호를 입력해주세요">
+            </div>
+            <div class="form-group">
+              <label for="InputPasswordCheck">비밀번호 확인</label>
+              <input type="password" class="form-control" name="passwordCheck" placeholder="비밀번호 확인을 위해 다시한번 입력 해 주세요">
+            </div>
+            <div class="form-group">
+              <label for="InputNickname">닉네임</label>
+              <input type="text" class="form-control" name="nickname" placeholder="사용할 닉네임을 입력해주세요">
+            </div>
+            <div class="form-group">
+              <label for="InputMobile">휴대폰 번호</label>
+              <input type="phone" class="form-control" name="phone" placeholder="휴대폰번호를 입력해 주세요">
+            </div>
+            {% if error %}
+              <div class="alert alert-danger">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ error }}
+              </div>
+            {% endif %}
+            <button type="submit" class="btn btn-outline-warning btn my-1 py-2" style="width: 100%;">회원가입</button>
+            <br/><br/>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

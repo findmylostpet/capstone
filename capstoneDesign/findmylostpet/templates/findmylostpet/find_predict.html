@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="text-center col-md-7 mx-auto" style="height:100px; margin-top: 50px;">
+                <h2>유기견 발견신고</h2>
+                <p class="lead">종 예측결과</p>
+            </div>
+        </div>
+        <form action="{% url 'add_find_breed' notice.id dog.id %}" method="POST">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                <div class="col-10 p-4 card-deck text-center">
+                    <div class="card mb-2 box-shadow">
+                        <img class="card-img-top rounded mx-auto img-responsive" src="{{pro_url.0}}"
+                            style="height: 200px;" />
+                        <div class="card-body">
+                            <h5 class="card-title pricing-card-title font-weight-normal">{{pred.0}}</h5>
+                            <h3 class="card-title pricing-card-title"> {{score.0}} <small class="text-muted"> % </small></h3>
+                            <input type="hidden" name="pred0" id="pred0" value="{{pred.0}}"/>
+                            <div class="progress my-1">
+                                <div class="progress-bar" role="progressbar"
+                                    style="width:{{score.0}}%; background-color:sandybrown;" aria-valuenow="{{score.0}}"
+                                    aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-outline-dark" style="width: 100%;" onclick="card_click(0)">선택</button>
+                        </div>
+                    </div>
+
+                    <div class="card mb-2 box-shadow">
+                        <img class="card-img-top rounded mx-auto img-responsive" src="{{pro_url.1}}"
+                            style="height: 200px;" />
+                        <div class="card-body">
+                            <h5 class="card-title pricing-card-title font-weight-normal">{{pred.1}}</h5>
+                            <h3 class="card-title pricing-card-title"> {{score.1}} <small class="text-muted"> % </small></h3>
+                            <input type="hidden" name="pred1" id="pred1" value="{{pred.1}}"/>
+                            <div class="progress my-1">
+                                <div class="progress-bar" role="progressbar"
+                                    style="width:{{score.1}}%; background-color:sandybrown;" aria-valuenow="{{score.1}}"
+                                    aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-outline-dark" style="width: 100%;" onclick="card_click(1)">선택</button>
+                        </div>
+                    </div>
+                    
+
+                    <div class="card mb-2 box-shadow">
+                        <img class="card-img-top rounded mx-auto img-responsive" src="{{pro_url.2}}"
+                            style="height: 200px;" />
+                        <div class="card-body">
+                            <h5 class="card-title pricing-card-title font-weight-normal">{{pred.2}}</h5>
+                            <h3 class="card-title pricing-card-title"> {{score.2}}<small class="text-muted"> % </small></h3>
+                            <input type="hidden" name="pred2" id="pred2" value="{{pred.2}}"/>
+                            <div class="progress my-1">
+                                <div class="progress-bar" role="progressbar"
+                                    style="width:{{score.2}}%; background-color:sandybrown;" aria-valuenow="{{score.2}}"
+                                    aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-outline-dark" style="width: 100%;" onclick="card_click(2)">선택</button>
+                        </div>
+                    </div>
+                    <script>
+                        function card_click(i) {
+                            var select = document.getElementById("breed");
+                            var pred = document.getElementById("pred"+i).value;
+                            select.value = pred
+                            //alert(pred+"을 누르셨습니다.");
+                            //select에 값을 넘겨서 submit하자
+                        }
+                    </script>
+                </div>
+            </div>
+
+            <div class="container-fluid" style="width: 85%;">
+                <hr>
+            </div>            
+            
+            <div class="row justify-content-center">
+                <div class="col-10 my-1">
+                    <h5>다른종일 경우 아래에서 선택해주세요</h5>
+                </div>
+            </div>
+            <div class="row my-1 justify-content-center">
+                <div class="col-10 my-1" >
+                    <select class="w-100" id="selected_breed" name="selected_breed" onchange="select_value(this)"></select>
+                    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+                    <!-- select2 javascript cdn -->
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.9/js/select2.min.js"></script>
+                    <script>
+                        // select2 초기화
+                        $('select').select2();
+                    </script>
+                    <script>
+                        function select_value(select_obj){
+                            var selected_index = select_obj.selectedIndex;
+                            var selected_value = select_obj.options[selected_index].value;
+
+                            var breed = document.getElementById("breed");
+                            breed.value = selected_value;
+                        };
+                    </script>
+                    <input type="hidden" name="breed" id="breed" value="아프간하운드"/>
+                </div>
+                <div class="col-10 my-1">
+                    <button class="btn btn-outline-secondary btn-lg btn-block" type="submit">
+                        선택하기
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}

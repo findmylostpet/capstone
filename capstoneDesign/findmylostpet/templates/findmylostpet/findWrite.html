@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!--
+  kakao api & exif 
+-->
+<script type="text/javascript"
+  src="http://dapi.kakao.com/v2/maps/sdk.js?appkey=4fc662d38be0df581e4bc20d5481fba4&libraries=services"></script>
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+
+<script>
+  function preview_images() {
+    $('#photo_preview').text(""); //전에 입력된 html 초기화
+
+    var total_file = document.getElementById("photo").files.length;
+
+    for (var i = 0; i < total_file; i++) {
+      $('#photo_preview').append("<div class='col-lg-4 col-sm-6 col-xs-6 mb-2'><div class='card btn-outline-light'> <img class='card-img-top mx-auto' src='" + URL.createObjectURL(event.target.files[i]) + "' id='img" + i + "' style=\"height:200px;\"></div></div>");
+
+      /**************************
+        EXIF사용가능
+        BUT 핸드폰 사진에서는 DataTime등을 못가져옴 예제이미지만 가능
+        이미지 좌표가져오는 방법은 블로그 참조
+        https://velog.io/@ready-dev/%EC%82%AC%EC%A7%84exif%EC%9D%98-GPS-%EC%A0%95%EB%B3%B4%EB%A5%BC-%EB%B0%9B%EC%95%84%EC%99%80-%EC%B9%B4%EC%B9%B4%EC%98%A4-%EB%A7%B5%EC%9C%BC%EB%A1%9C-%EB%9D%84%EC%9A%B0%EA%B8%B0-only-js-qvk5cgr1xj
+      ***************************/
+
+      if (i == 0) {
+        document.getElementById("img0").onload = function () {
+          this.exifdata = null;
+          EXIF.getData(this, function () {
+            //var allMetaData = EXIF.getAllTags(this);
+            var exiftime = EXIF.getTag(this, "DateTimeOriginal");
+
+            //imgTime이라는 id를 가진 html p태그에 값을 보낼수있다(html에 값넘기는 법)
+            exiftime = exiftime.replace(/:/gi, '-').substring(0, 10);
+            var imgTime = document.getElementById("find_date");
+            imgTime.value = `${exiftime}`;
+
+            var exifLong = EXIF.getTag(this, "GPSLongitude");
+            var exifLat = EXIF.getTag(this, "GPSLatitude");
+            var exifLongRef = EXIF.getTag(this, "GPSLongitudeRef");
+            var exifLatRef = EXIF.getTag(this, "GPSLatitudeRef");
+
+            //계산식 적용이유는 해당라이브러리가 위도경도를 도분초 단위로 출력하기 때문
+            if (exifLatRef == "S") {
+              var latitude = (exifLat[0] * -1) + (((exifLat[1] * -60) + (exifLat[2] * -1)) / 3600);
+            } else {
+              var latitude = exifLat[0] + (((exifLat[1] * 60) + exifLat[2]) / 3600);
+            }
+
+            if (exifLongRef == "W") {
+              var longitude = (exifLong[0] * -1) + (((exifLong[1] * -60) + (exifLong[2] * -1)) / 3600);
+            } else {
+              var longitude = exifLong[0] + (((exifLong[1] * 60) + exifLong[2]) / 3600);
+            }
+
+            var wtmX = latitude, // 변환할 WTM X 좌표 입니다
+              wtmY = longitude; // 변환할 WTM Y 좌표 입니다
+
+            var exifcoord = new kakao.maps.LatLng(wtmX, wtmY);
+            console.log(exifcoord)
+
+            var exifcallback = function (result, status) {
+              if (status === kakao.maps.services.Status.OK) {
+                //console.log('그런 너를 마주칠까 ' + result[0].address.address_name + '을 못가');
+                //!!result address!!
+                //result[0].address.address_name을 통해 metadata로 address값을 받아올수있다
+                var imgAddress = document.getElementById("loc");
+                imgAddress.innerHTML = `${result[0].address.address_name}`;
+                document.getElementById("si").value = `${result[0].address.region_1depth_name}`;
+                document.getElementById("gu").value = `${result[0].address.region_2depth_name}`;
+                document.getElementById("dong").value = `${result[0].address.region_3depth_name}`;
+              }
+            };
+
+            geocoder.coord2Address(exifcoord.getLng(), exifcoord.getLat(), exifcallback);
+
+            console.log(exiftime)
+            //console.log(JSON.stringify(allMetaData, null, "\t") );
+          })
+        };//endload
+      }//endif
+    }
+  }
+
+</script>
+
+<script>
+  //로딩화면
+  function showModal() {
+    console.log("SHOW");
+    $("#myModal").show();
+  }
+</script>
+
+<div class="py-2">
+  <div class="container">
+    <div class="row">
+      <div class="text-center col-md-7 mx-auto" style="height:100px; margin-top: 50px;">
+        <h2>발견된 유기견 신고</h2>
+        <p class="lead"><mark style="background-color: lavender;">발견된 유기견</mark>의 정보를 입력해주세요</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="order-md-1 col-md-10">
+        <form class="needs-validation" novalidate="" action="{% url 'find_create' %}" method="POST"
+          enctype="multipart/form-data">
+          {% csrf_token %}
+          <script>
+            var latitude;
+            var longitude;
+            var coord;
+            var geocoder;
+
+            navigator.geolocation.getCurrentPosition(function (pos) {
+              latitude = pos.coords.latitude;
+              longitude = pos.coords.longitude;
+              coord = new kakao.maps.LatLng(latitude, longitude);
+              geocoder = new kakao.maps.services.Geocoder();
+              // var coord = new kakao.maps.LatLng(latitude, longitude);
+              var callback = function (result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                  var gpsAddress = document.getElementById("loc");
+                  gpsAddress.innerHTML = `${result[0].address.address_name}`;
+                  document.getElementById("si").value = `${result[0].address.region_1depth_name}`;
+                  document.getElementById("gu").value = `${result[0].address.region_2depth_name}`;
+                  document.getElementById("dong").value = `${result[0].address.region_3depth_name}`;
+                  //result[0].address.region_1depth_name 경기
+                  //result[0].address.region_2depth_name 고양시 덕양구
+                  //result[0].address.region_3depth_name 화전동
+                }
+              };
+              geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
+            });
+
+          </script>
+          <div class="row">
+            <div class="col-12"> <label>발견 위치<br></label>
+              <p class="lead" name="si" id="loc"></p>
+              <input type="hidden" name="si" id="si" value="경기도" />
+              <input type="hidden" name="gu" id="gu" value="고양시 덕양구" />
+              <input type="hidden" name="dong" id="dong" value="화전동" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-6 my-1">
+              <label for="address2" name="sex" id="sex">성별</label>
+              <select class="custom-select d-block w-100" name="sex" id="sex" selected="{{sex}}" required>
+                {% if sex == null %}
+                <option value="">선택해주세요</option>
+                {%else%}
+                <option selected="selected">
+                  {{sex}}
+                </option>
+                {% endif %}
+                <option value="암컷">암컷</option>
+                <option value="수컷">수컷</option>
+                <option value="미상">미상</option>
+
+              </select>
+              {% if error_sex %}
+              <div class="alert alert-danger my-1">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ error_sex }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-6 my-1">
+              <label for="address2" name="sex" id="sex">상태</label>
+              <select class="custom-select d-block w-100" name="state" id="state" selected="{{state}}" required="">
+                {% if state == null %}
+                <option value="">선택해주세요</option>
+                {%else%}
+                <option selected="selected">
+                  {{state}}
+                </option>
+                {% endif %}
+                <option value="보호중">보호중</option>
+                <option value="발견">발견</option>
+              </select>
+
+              {% if error_state %}
+              <div class="alert alert-danger my-1">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ error_state }}
+              </div>
+              {% endif %}
+            </div>
+
+          </div>
+          <div class="row my-1">
+            <div class="col-12"> <label for="address">날짜</label>
+              <input type="date" name="find_date" class="form-control" id="find_date" required="">
+              <script>
+                document.getElementById("find_date").value = new Date().toISOString().substring(0, 10);
+              </script>
+            </div>
+
+          </div>
+
+          <div class="form-group my-2"> <label>특이사항</label>
+            <div class="col-14"><textarea class="form-control" name="note" id="form30" rows="3"
+                placeholder="특이사항을 입력해주세요.">{{note}}</textarea></div>
+          </div>
+          <div class="row my-1">
+            <div class="col-12">
+              <label>사진</label>
+
+              <div class="px-2">
+                <div class="row" id='photo_preview'></div>
+              </div>
+
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="photo" name="photo" onchange="preview_images();"
+                  multiple>
+                <label class="custom-file-label" for="photo">사진 업로드</label>
+
+                <script>
+                  $('#photo').on('change', function () {
+                    //get the file name
+                    var fileNum = document.getElementById("photo").files.length;
+
+                    //replace the "Choose a file" label
+                    if (fileNum != 1) {
+                      $(this).next('.custom-file-label').html(fileNum + '개의 파일 선택');
+                    } else {
+                      var fileName = $(this).val();
+                      $(this).next('.custom-file-label').html(fileName);
+                    }
+                  })
+                </script>
+              </div>
+            </div>
+          </div>
+          <div class="row my-1">
+            <div class="col-12 my-2">
+              {% if error_photo %}
+              <div class="alert alert-danger">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ error_photo }}
+              </div>
+              {% endif %}
+              <button class="btn btn-outline-secondary btn-lg btn-block" type="submit" id="predict" data-toggle="modal"
+                data-target="#myModal" data-backdrop="static" data-keyboard="false" onclick="showModal();">
+                공고 올리기
+              </button>
+
+              <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content text-center">
+                    <div class="modal-header">
+                      <h5 class="modal-title"> 종 분석 중...</h5>
+                    </div>
+                    <div class="modal-body my-3" style="text-align: center;">
+                      <div class="spinner-grow text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-secondary fast" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-success" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-danger fast" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-warning" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-info fast" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-light" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <div class="spinner-grow text-dark fast" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+
+                      <br />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="py-2">
+  <div class="container">
+    <div class="row">
+      <div class="text-center col-md-7 mx-auto" style="height:100px; margin-top: 50px;">
+        <h2>실종된 반려견 공고</h2>
+        <p class="lead"><mark style="background-color: lavenderblush;">잃어버린 반려견</mark>을 찾아주세요</p>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="py-2">
+  <div class="mb-4">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="order-md-1 col-md-10">
+          <form action="{% url 'lostList' %}" method="GET" enctype="multipart/form-data" class="needs-validation"
+            novalidate="">
+            {% csrf_token %}
+            <div class="row my-1">
+              <div class="col-12 my-1">
+                <label for="breed" contenteditable="true">종</label>
+                <select class="w-100" id="selected_breed" name="selected_breed" onchange="select_value(this)"></select>
+                <script>
+                  function select_value(select_obj){
+                      var selected_index = select_obj.selectedIndex;
+                      var selected_value = select_obj.options[selected_index].value;
+
+                      var breed = document.getElementById("breed");
+                      breed.value = selected_value;
+                  };
+
+                </script>
+                {% if b %}
+                <input type="hidden" name="breed" id="breed" value="{{b}}"/>
+                {% else %}
+                <input type="hidden" name="breed" id="breed" value="아프간하운드"/>
+                {% endif %}
+                <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+                <!-- select2 javascript cdn -->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.9/js/select2.min.js"></script>
+                <script>
+                  // select2 초기화
+                  $('select').select2();
+                </script>
+              </div>
+            </div>
+            <div class="row my-1">
+              <div class="col-4 my-1"><label for="sido">시</label>
+                <select class="custom-select d-block w-100" id="sido" name="sido">
+                  {%if si%}
+                  <option value="{{si}}">{{si}}</option>
+                  {%else%}
+                  <option value="">선택</option>
+                  {%endif%}
+                </select>
+              </div>
+              <div class="col-4 my-1"> <label for="sigugun">구</label>
+                <select class="custom-select d-block w-100" id="sigugun" name="sigugun">
+                  {%if gugun%}
+                  <option value="{{gugun}}">{{gugun}}</option>
+                  {%else%}
+                  <option value="sigugun">선택</option>
+                  {%endif%}
+                </select>
+              </div>
+              <div class="col-4 my-1"> <label for="dong">동</label>
+                <select class="custom-select d-block w-100" id="dong" name="dong">
+                  {%if dong%}
+                  <option value="{{dong}}">{{dong}}</option>
+                  {%else%}
+                  <option value="">선택</option>
+                  {%endif%}
+                </select>
+              </div>
+            </div>
+
+            <div class="row my-1">
+              <div class="col-10 my-1"> <label for="country">날짜</label>
+                <input type='date' name='lost_date' class="form-control" value='' />
+              </div>
+              <div class="col-2 my-4">
+                <button class="btn btn-block btn-light" type="submit">
+                  <a href="?sido={{si}}&sigugun={{gugun}}" style="text-decoration:none; color:black">찾기</a></button>
+              </div>
+            </div>
+          </form>
+          <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+          <div>
+            <!--
+            <p style="margin-top:-12px">
+              사용한 데이터를 보시려면
+              <em class="link">
+                <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+                <a href="/capstoneDesign/findmylostpet/templates/findmylostpet/json/mapPoint.json" target="_blank">여기를
+                  클릭하세요!</a>
+              </em>
+            </p>
+          -->
+
+            <div id="map" style="width:100%;height:350px;"></div>
+
+
+            <script type="text/javascript"
+              src="//dapi.kakao.com/v2/maps/sdk.js?appkey=4fc662d38be0df581e4bc20d5481fba4&libraries=services,clusterer"></script>
+            <script>
+              var map = new kakao.maps.Map(document.getElementById('map'), { // 지도를 표시할 div
+                center: new kakao.maps.LatLng(37.599579, 126.865186), // 지도의 중심좌표
+                level: 10 // 지도의 확대 레벨
+              });
+
+              // 항공대 (37.599579,126.865186)
+              // 마커 클러스터러를 생성합니다
+              // 마커 클러스터러를 생성할 때 disableClickZoom 값을 true로 지정하지 않은 경우
+              // 클러스터 마커를 클릭했을 때 클러스터 객체가 포함하는 마커들이 모두 잘 보이도록 지도의 레벨과 영역을 변경합니다
+              // 이 예제에서는 disableClickZoom 값을 true로 설정하여 기본 클릭 동작을 막고
+              // 클러스터 마커를 클릭했을 때 클릭된 클러스터 마커의 위치를 기준으로 지도를 1레벨씩 확대합니다
+              var clusterer = new kakao.maps.MarkerClusterer({
+                map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
+                averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
+                minLevel: 10, // 클러스터 할 최소 지도 레벨
+                disableClickZoom: true // 클러스터 마커를 클릭했을 때 지도가 확대되지 않도록 설정한다
+              });
+              /*
+              var data1 = [
+                [37.62293367990081, 126.83445005122417],
+                [37.51043665598106, 127.03974070036524],
+                [35.10368644802913, 129.0206862606022]
+              ];
+
+              var markers = [];
+              for (var i = 0; i < data1.length; i++) {
+                var marker = new kakao.maps.Marker({
+                  position: new kakao.maps.LatLng(data1[i][0], data1[i][1]),
+                  map: map
+                });
+                markers.push(marker);
+                clusterer.addMarkers(markers)
+              }
+            */
+
+              // 데이터를 가져오기 위해 jQuery를 사용합니다
+              // 데이터를 가져와 마커를 생성하고 클러스터러 객체에 넘겨줍니다
+              $.getJSON("/capstoneDesign/findmylostpet/templates/findmylostpet/json/mapPoint.json", function (data) {
+                // 데이터에서 좌표 값을 가지고 마커를 표시합니다
+                // 마커 클러스터러로 관리할 마커 객체는 생성할 때 지도 객체를 설정하지 않습니다
+
+                var markers = $(data.positions).map(function (i, position) {
+                  var maks = new kakao.maps.Marker({
+
+                    position: new kakao.maps.LatLng(position.lat, position.lng)
+
+                  });
+
+                  var infowindow = new kakao.maps.InfoWindow({
+                    content: position.content,
+                    //content: content,
+                    removable: true
+                  });
+
+                  kakao.maps.event.addListener(maks, 'click', makeOverListener(map, maks, infowindow));
+                  return maks;
+                });
+
+
+                // 클러스터러에 마커들을 추가합니다
+                clusterer.addMarkers(markers);
+              });
+              function makeOverListener(map, marker, infowindow) {
+                infowindow.close();
+                return function () {
+                  infowindow.open(map, marker);
+                };
+              }
+
+              // 인포윈도우를 닫는 클로저를 만드는 함수입니다
+              function makeOutListener(infowindow) {
+                return function () {
+                  infowindow.close();
+                };
+              }
+
+              function closeOverlay() {
+                infowindow.close();
+              }
+
+              // 마커 클러스터러에 클릭이벤트를 등록합니다
+              // 마커 클러스터러를 생성할 때 disableClickZoom을 true로 설정하지 않은 경우
+              // 이벤트 헨들러로 cluster 객체가 넘어오지 않을 수도 있습니다
+              kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster) {
+
+                // 현재 지도 레벨에서 1레벨 확대한 레벨
+                var level = map.getLevel() - 3;
+                console.log(clusterer.markers);
+                // 지도를 클릭된 클러스터의 마커의 위치를 기준으로 확대합니다
+                map.setLevel(level, { anchor: cluster.getCenter() });
+                myFunction();
+              });
+
+              // 마커 클릭이벤트 추가.
+
+              // 마커 위에 커스텀오버레이를 표시합니다
+              // 마커를 중심으로 커스텀 오버레이를 표시하기위해 CSS를 이용해 위치를 설정했습니다
+
+              var content = '<div class="wrap">' +
+                '    <div class="info">' +
+                '        <div class="title">' +
+                '            카카오 스페이스닷원' +
+                '            <div class="close" onclick="makeOutListener(infowindow)" title="닫기"></div>' +
+                '        </div>' +
+                '        <div class="body">' +
+                '            <div class="img">' +
+                '                <img src="/media/lostList/images/17.jpg" width="73" height="70">' +
+                '           </div>' +
+                '            <div class="desc">' +
+                '                <div class="ellipsis">제ddddd242</div>' +
+                '                <div class="jibun ellipsis">(우) 63309 (지번) 영평동 2181</div>' +
+                '                <div><a href="https://www.kakaocorp.com/main" target="_blank" class="link">홈페이지</a></div>' +
+                '            </div>' +
+                '        </div>' +
+                '    </div>' +
+                '</div>';
+            </script>
+            <div class="row mt-3">
+              {% for lostPost in posts %}
+              <div class="col-lg-3 col-sm-6 col-xs-3 mb-2">
+                <div class="card btn-outline-light">
+                  {% for dog in lostPost.dog_set.all %}
+                  <a href="{% url 'lostListDetail2' lostPost.id dog.id %}" style="text-decoration:none;color:dimgray;">
+                    {% if dog.photo_set.all %}
+                    {% for photo in dog.photo_set.all|slice:":1" %}
+                    <img class="card-img-top mx-auto" src="{{photo.Photo.url}}" style="height: 200px">
+                    {% endfor %}
+                    {% else %}
+                    <img class="card-img-top mx-auto p-4"
+                      src="https://www.flaticon.com/svg/static/icons/svg/2965/2965072.svg" style="height: 200px">
+                    {% endif %}
+                    <div class="card-body">
+                      <h5 class="card-title" style="text-align: center;">{{dog.Name}}</h5>
+                      <h4 class="card-title" style="text-align: center;">{{dog.Breed}}</h4>
+                      <!--
+                        <p class="card-text"> 성별: {{dog.Sex}}<br>특징: {{lostPost.Text|truncatewords:3}} <br> 실종장소:
+                        {{lostPost.Si}}
+                        {{lostPost.Gu}} <br>실종시간 :
+                        {{lostPost.MissingDate}}</p>
+                        <a href="{% url 'lostListDetail2' lostPost.id dog.id %}" class="btn btn-primary">자세히보기</a>
+                      -->
+                      <p class="card-text" style="text-align: center;">{{lostPost.Si}} {{lostPost.Gu}} <br>
+                        {{lostPost.MissingDate}}</p>
+                  </a>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <div>
+            {%if posts.paginator.num_pages > 1%}
+            <nav aria-label="...">
+              {% if si%}
+              <ul class="pagination" style="justify-content: center;">
+                <li class="page-item">
+                  <a class="page-link" style="color:lightslategray" href="?sido={{si}}&sigugun={{gugun}}&page=1">&laquo;</a>
+                </li>
+                {% for i in posts.paginator.page_range%}
+                  {% if i >= posts.number|add:-5 and i <= posts.number|add:5 %}
+                    {%if i == posts.number %}
+                    <li class="page-item active">
+                      <a class="page-link" style="color:lightslategray; background-color: lavenderblush; border-color: gainsboro;"
+                        href="?sido={{si}}&sigugun={{gugun}}&page={{i}}">{{i}} <span class="sr-only"></span></a>
+                    </li>
+                    {%else%}
+                    <li class="page-item"><a class="page-link" style="color:lightslategray"
+                        href="?sido={{si}}&sigugun={{gugun}}&page={{i}}">{{i}}</a>
+                    </li>
+                    {%endif%}
+                  {%endif%}
+                {%endfor%}
+                <li class="page-item">
+                  <a class="page-link" style="color:lightslategray"
+                    href="?sido={{si}}&page={{posts.paginator.num_pages}}">&raquo;</a>
+                </li>
+              </ul>
+              {%else%}
+              <ul class="pagination" style="justify-content: center;">
+                <li class="page-item">
+                  <a class="page-link" style="color:lightslategray" href="?page=1">&laquo;</a>
+                </li>
+                {% for i in posts.paginator.page_range%}
+                  {% if i >= posts.number|add:-5 and i <= posts.number|add:5 %}
+                    {%if i == posts.number %}
+                    <li class="page-item active">
+                      <a class="page-link" style="color:lightslategray; background-color: lavenderblush; border-color: gainsboro;"
+                        href="?page={{i}}">{{i}} <span class="sr-only"></span></a>
+                    </li>
+                    {%else%}
+                    <li class="page-item"><a class="page-link" style="color:lightslategray" href="?page={{i}}">{{i}}</a>
+                    </li>
+                    {%endif%}
+                  {%endif%}
+                {%endfor%}
+                <li class="page-item">
+                  <a class="page-link" style="color:lightslategray" href="?page={{posts.paginator.num_pages}}">&raquo;</a>
+                </li>
+              </ul>
+              {%endif%}
+            </nav>
+
+            {%endif%}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function myFunction() {
+      var x = document.getElementById("list");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
+    }
+  </script>
+  {% endblock %}

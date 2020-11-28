@@ -1,0 +1,184 @@
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  div.ex1 {
+    display: block;
+    max-width: 400px;
+    height: 300px;
+    margin: auto;
+
+    border: 3px;
+  }
+</style>
+<div class="py-2">
+  <div class="container">
+    <div class="row">
+      <div class="text-center col-md-7 mx-auto" style="height:50px; margin-top: 50px;">
+        <h2>발견된 유기견 공고</h2>
+        <p class="lead"><mark style="background-color: lavender;">유기견을 발견</mark>했어요</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="pt-4">
+  <!--
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h3 class="mb-3 text-center"> <mark style="background-color: lavender;">
+          발견된 유기견 공고</mark></h3>
+      </div>
+    </div>
+  </div>
+-->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="ex1">
+        <div class="w3-content w3-display-container">
+          <!--사진이 여러개인 경우 X -->
+          {% for photo in dog.photo_set.all %}
+          <div class="w3-display-container mySlides ">
+            <img src="{{photo.Photo.url}}" style="width:100%" height="300px">
+          </div>
+          {% endfor %}
+          {% if dog.photo_set.count != 1 %}
+          <button class="w3-button w3-display-left w3-white" onclick="plusDivs(-1)">❮</button>
+          <button class="w3-button w3-display-right w3-white" onclick="plusDivs(1)">❯</button>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script>
+    var slideIndex = 1;
+    showDivs(slideIndex);
+
+    function plusDivs(n) {
+      showDivs(slideIndex += n);
+    }
+
+    function showDivs(n) {
+      var i;
+      var x = document.getElementsByClassName("mySlides");
+      if (n > x.length) { slideIndex = 1 }
+      if (n < 1) { slideIndex = x.length }
+      for (i = 0; i < x.length; i++) {
+        x[i].style.display = "none";
+      }
+      x[slideIndex - 1].style.display = "block";
+    }
+  </script>
+  <div>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-8 mb-3 text-center">
+          <!--
+          <h4 class="mb-3 mt-3 text-center">상세정보</h4>
+          -->
+          <table class="table mb-3 mt-3">
+            <tbody>
+              <tr>
+                <th scope="row">공고 게시일</th>
+                <td>{{notice.PubDate}}</td>
+              </tr>
+              <tr>
+                <th scope="row">종</th>
+                <td>{{dog.Breed}}</td>
+              </tr>
+              <tr>
+                <th scope="row">성별</th>
+                <td>{{dog.Sex}}</td>
+              </tr>
+              <tr>
+                <th scope="row">발견장소</th>
+                <td>{{location}}</td>
+              </tr>
+              <tr>
+                <th scope="row">특이사항</th>
+                <td>{{notice.Text}}</td>
+              </tr>
+              <tr>
+                <th scope="row">상태</th>
+                <td>{{notice.State}}</td>
+              </tr>
+              <tr>
+                <th scope="row">연락처</th>
+                <td>{{notice.Phone}}</td>
+              </tr>
+              <tr>
+                <th scope="row"></th>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="row">
+        {% for findPost in posts %}
+        <div class="col-lg-3 col-sm-6 col-xs-6 mb-2">
+          <div class="card btn-outline-light">
+            {% for dog in findPost.dog_set.all %}
+            <a href="{% url 'findListDetail2' findPost.id dog.id %}" style="text-decoration:none;color:dimgray;">
+              {% if dog.photo_set.all %}
+                {% for photo in dog.photo_set.all|slice:":1" %}
+                <img class="card-img-top mx-auto" src="{{photo.Photo.url}}" style="height: 200px">
+                {% endfor %}
+                {% else %}
+                <img class="card-img-top mx-auto p-4" src="https://www.flaticon.com/svg/static/icons/svg/2965/2965072.svg"
+                  style="height: 200px">
+                {% endif %}
+              <!--
+                <h6 class="card-title" style="text-align: center; color: gray">{{dog.State}}</h6>
+                <h4 class="card-title">{{dog.Breed}}</h4>
+                <p class="card-text"> 성별: {{dog.Sex}}<br>특징: {{findPost.Text|truncatewords:3}} <br> 발견장소:
+                  {{findPost.Si}}
+                  {{findPost.Gu}} <br>발견시간 :
+                  {{findPost.MissingDate}}</p>
+                <a href="{% url 'findListDetail2' findPost.id dog.id %}" class="btn btn-primary">자세히보기</a>
+                
+                이 내용 추가
+                <h5 class="card-title" style="text-align: center;">보관장소</h5>
+              -->
+              <div class="card-body">
+                <h4 class="card-title" style="text-align: center;">{{dog.Breed}}</h4>
+                <p class="card-text" style="text-align: center;"> {{findPost.Si}} {{findPost.Gu}} <br>
+                  {{findPost.MissingDate}}</p>
+            </a>
+            {%endfor%}
+          </div>
+        </div>
+      </div>
+      {%endfor%}
+    </div>
+    <div>
+      {%if posts.paginator.num_pages > 1%}
+      <nav aria-label="...">
+        <ul class="pagination" style="justify-content: center;">
+          <li class="page-item">
+            <a class="page-link" style="color:lightslategray" href="page=1">&laquo;</a>
+          </li>
+          {% for i in posts.paginator.page_range%}
+          {%if i == posts.number %}
+          <li class="page-item active">
+            <a class="page-link" style="color:lightslategray; background-color: lavender; border-color:gainsboro;"
+              href="page={{i}}">{{i}} <span class="sr-only"></span></a>
+          </li>
+          {%else%}
+          <li class="page-item"><a class="page-link" style="color:lightslategray" href="?page={{i}}">{{i}}</a>
+          </li>
+          {%endif%}
+          {%endfor%}
+  
+          <li class="page-item">
+            <a class="page-link" style="color:lightslategray" href="page={{fposts.paginator.num_pages}}">&raquo;</a>
+          </li>
+        </ul>
+      </nav>
+      {%endif%}
+    </div>
+  </div>
+</div>
+{% endblock %}

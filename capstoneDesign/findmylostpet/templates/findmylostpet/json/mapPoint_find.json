@@ -1,0 +1,22 @@
+{
+    "positions": [
+        {
+            "dog_breed": "골든리트리버",
+            "dog_sex": "수컷",
+            "notice_num": "55",
+            "address_name": "서울 마포구 동교동",
+            "lat": 37.557208530833,
+            "lng": 126.922261659865,
+            "content": "<div class=\"wrap\">    <div class=\"info\">        <div class=\"title\"> 골든리트리버            <div class=\"close\" onclick=\"closeOverlay()\" title=\"닫기\"></div>        </div>        <div class=\"body\">            <div class=\"img\">                <img src=\"/media/lostList/images/스크린샷_2020-09-04_오후_2.03.11.png\" width=\"90\" height=\"90\">           </div>            <div class=\"desc\">                <div class=\"Sex\"> 성별 : 수컷</div>                <div class=\"State\"> 상태: 발견</div>                <div><a href=\"../findListDetail/55/315\"target=\"_blank\" class=\"link\">공고 상세보기</a></div>            </div>        </div>    </div></div>"
+        },
+        {
+            "dog_breed": "재패니즈스피츠",
+            "dog_sex": "수컷",
+            "notice_num": "56",
+            "address_name": "서울 마포구 서교동",
+            "lat": 37.5551093133848,
+            "lng": 126.91459072348,
+            "content": "<div class=\"wrap\">    <div class=\"info\">        <div class=\"title\"> 재패니즈스피츠            <div class=\"close\" onclick=\"closeOverlay()\" title=\"닫기\"></div>        </div>        <div class=\"body\">            <div class=\"img\">                <img src=\"/media/lostList/images/KakaoTalk_20201124_125802450_01.png\" width=\"90\" height=\"90\">           </div>            <div class=\"desc\">                <div class=\"Sex\"> 성별 : 수컷</div>                <div class=\"State\"> 상태: 보호중</div>                <div><a href=\"../findListDetail/56/316\"target=\"_blank\" class=\"link\">공고 상세보기</a></div>            </div>        </div>    </div></div>"
+        }
+    ]
+}

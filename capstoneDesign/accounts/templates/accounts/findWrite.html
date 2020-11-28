@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<script>
+  function preview_images() {
+    $('#photo_preview').text(""); //전에 입력된 html 초기화
+
+    var total_file = document.getElementById("photo").files.length;
+
+    for (var i = 0; i < total_file; i++) {
+      $('#photo_preview').append("<div class='col-lg-4 col-sm-6 col-xs-6 mb-2'><div class='card btn-outline-light'> <img class='card-img-top mx-auto' src='" + URL.createObjectURL(event.target.files[i]) + "' style=\"height:200px;\"></div></div>");
+    }
+  }
+</script>
+
+<div class="py-2">
+  <div class="container">
+      <div class="row">
+          <div class="text-center col-md-7 mx-auto" style="height:100px; margin-top: 50px;">
+              <h2>발견된 유기견 신고</h2>
+              <p class="lead"><mark style="background-color: lavender;">발견된 유기견</mark>의 정보를 수정해주세요</p>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="order-md-1 col-md-10">
+        <form class="needs-validation" novalidate="" action="{% url 'find_editing' notice.id %}" method="POST"
+          enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="row my-1">
+
+            <div class="col-4 my-1"><label for="sido">시</label>
+              <select class="custom-select d-block w-100" id="sido" name="sido">
+                <option value="{{notice.Si}}">{{notice.Si}}</option>
+              </select>
+            </div>
+            <div class="col-4 my-1"> <label for="sigugun">구</label>
+              <select class="custom-select d-block w-100" id="sigugun" name="sigugun">
+                <option value="{{notice.Gu}}">{{notice.Gu}}</option>
+              </select>
+            </div>
+            <div class="col-4 my-1"> <label for="dong">동</label>
+              <select class="custom-select d-block w-100" id="dong" name="dong">
+                <option value="{{notice.Dong}}">{{notice.Dong}}</option>
+              </select>
+            </div>
+
+          </div>
+          <div class="row">
+            <div class="col-4 my-1">
+              <label for="breed">종</label>
+              <select class="custom-select d-block w-100" name="breed" id="state" required="" value="{{dog.Breed}}">
+                {% for b in data.breed %}
+                <option value="{{b}}" {% if b == dog.Breed %} selected{%endif%}>{{b}}</option>
+                {%endfor%}
+              </select>
+            </div>
+            <div class="col-4 my-1">
+              <label for="address2" name="sex" id="sex" contenteditable="true">성별</label>
+              <select class="custom-select d-block w-100" name="sex" id="state" required="" value="{{dog.Sex}}">
+                {% for g in data.gender %}
+                <option value="{{g}}" {% if g == dog.Sex %} selected{%endif%}>{{g}}</option>
+                {%endfor%}
+              </select>
+            </div>
+            <div class="col-4 my-1">
+              <label for="address2" name="sex" id="sex" contenteditable="true">상태</label>
+              <select class="custom-select d-block w-100" name="state" id="state" required="" value="{{notice.State}}">
+                {% if notice.State == "보호중" %}
+                <option value="보호중">보호중</option>
+                <option value="발견">발견</option>
+                {% else %}
+                <option value="발견">발견</option>
+                <option value="보호중">보호중</option>
+                {%endif%}
+              </select>
+            </div>
+          </div>
+          <div class="row my-1">
+            <div class="col-12"> <label for="address">날짜</label>
+              <input type="date" value="{{notice.MissingDate}}" name="find_date" class="form-control" id="address"
+                required="">
+              <div class="invalid-feedback"> Please enter your shipping address. </div>
+            </div>
+          </div>
+          <div class="row my-1">
+            <div class="col-12"> <label for="phone">연락처</label>
+              <input type="tel" value="{{notice.Phone}}" class="form-control" name="phone" placeholder="- 없이 입력해주세요">
+            </div>
+          </div>
+          <div class="form-group my-2"> <label>특이사항</label>
+            <div class="col-14"><textarea class="form-control" name="note" id="form30" rows="3"
+                placeholder="특이사항을 입력해주세요.">{{notice.Text}}</textarea></div>
+          </div>
+          <div class="row my-1">
+            <div class="col-12">
+              <label>사진</label>
+              <div class="px-2">
+                <div class="row" id='photo_preview'></div>
+              </div>
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="photo" name="photo[]" onchange="preview_images();"
+                  multiple>
+                <label class="custom-file-label" for="photo">사진 업로드</label>
+                <script>
+                  $('#photo').on('change', function () {
+                    //get the file name
+                    var fileNum = document.getElementById("photo").files.length;
+
+                    //replace the "Choose a file" label
+                    if (fileNum != 1) {
+                      $(this).next('.custom-file-label').html(fileNum + '개의 파일 선택');
+                    } else {
+                      var fileName = $(this).val();
+                      $(this).next('.custom-file-label').html(fileName);
+                    }
+                  })
+                </script>
+              </div>
+            </div>
+          </div>
+          <div class="row my-1">
+            <div class="col-12 my-2"><button class="btn btn-outline-secondary btn-lg btn-block" type="submit">
+                발견공고 수정</button></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>찾아주개</title>
+
+  <link rel="stylesheet" href="../static/css/theme.css" type="text/css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    type="text/css">
+  <link rel="stylesheet" href="https://static.pingendo.com/bootstrap/bootstrap-4.3.1.css">
+
+  <!-- 강아지 품종 select2 -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.9/js/select2.min.js"></script>
+
+  <style type="text/css">
+    @import url(//fonts.googleapis.com/earlyaccess/jejumyeongjo.css);
+    @import url(//fonts.googleapis.com/earlyaccess/jejugothic.css);
+
+    @import url(http://fonts.googleapis.com/earlyaccess/nanummyeongjo.css);
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: 'Jeju Gothic';
+    }
+
+    body {
+      font-family: 'Jeju Gothic';
+    }
+
+    .jm-font {
+      font-family: 'Jeju Myeongjo', serif;
+      /*웹 폰트 지정*/
+      /* color: orange; */
+    }
+
+    .jg-font {
+      font-family: 'Jeju Gothic', serif;
+    }
+
+    .nm-font {
+      font-family: 'Nanum Myeongjo', serif;
+    }
+
+    /* <p class="jm-font">제주-명조 웹 폰트를 적용한 글씨이다.</p> */
+  </style>
+
+  <script src="https://code.jquery.com/jquery-latest.min.js" type="application/javascript"></script>
+  <script type="application/javascript"
+    src="https://zelkun.tistory.com/attachment/cfile8.uf@99BB7A3D5D45C065343307.js"></script>
+  <script type="application/javascript">
+    jQuery(document).ready(function () {
+      //sido option 추가
+      jQuery.each(hangjungdong.sido, function (idx, code) {
+        //append를 이용하여 option 하위에 붙여넣음
+        jQuery('#sido').append(fn_option(code.sido, code.codeNm));
+      });
+
+
+      jQuery('#sido').change(function () {
+        var sido = jQuery('#sido option:selected').text();
+
+        jQuery('#sigugun').show();
+        jQuery('#sigugun').empty();
+        jQuery('#sigugun').append(fn_option('', '선택')); //
+        jQuery.each(hangjungdong.sigugun, function (idx, code) {
+          if (jQuery('#sido > option:selected').val() == code.sido)
+            jQuery('#sigugun').append(fn_option(code.sigugun, code.codeNm));
+        });
+
+        //세종특별자치시 예외처리
+        //옵션값을 읽어 비교
+        if (jQuery('#sido option:selected').val() == '36') {
+          jQuery('#sigugun').hide();
+          //index를 이용해서 selected 속성(attr)추가
+          //기본 선택 옵션이 최상위로 index 0을 가짐
+          jQuery('#sigugun option:eq(1)').attr('selected', 'selected');
+          //trigger를 이용해 change 실행
+          jQuery('#sigugun').trigger('change');
+        }
+
+      });
+
+      //시군구 변경시 행정동 옵션추가
+      jQuery('#sigugun').change(function () {
+        //option 제거
+        jQuery('#dong').empty();
+        jQuery.each(hangjungdong.dong, function (idx, code) {
+          if (jQuery('#sido > option:selected').val() == code.sido && jQuery('#sigugun > option:selected').val() == code.sigugun)
+            jQuery('#dong').append(fn_option(code.dong, code.codeNm));
+        });
+        //option의 맨앞에 추가
+        jQuery('#dong').prepend(fn_option('', '선택'));
+        //option중 선택을 기본으로 선택
+        jQuery('#dong option:eq("")').attr('selected', 'selected');
+
+      });
+      jQuery('#dong').change(function () {
+        var sido = jQuery('#sido option:selected').text();
+        var sigugun = jQuery('#sigugun option:selected').text();
+        var dong = jQuery('#dong option:selected').text();
+
+        var dongCode = sido + ' ' + sigugun + ' ' + dong;
+        jQuery('#sido option:selected').attr({ value: sido });
+        jQuery('#sigugun option:selected').attr({ value: sigugun });
+        jQuery('#dong option:selected').attr({ value: dong });
+
+        //동네예보 URL
+        var url = 'https://www.weather.go.kr/weather/process/timeseries-dfs-body-ajax.jsp?myPointCode=' + dongCode + '&unit=K';
+
+        //iframe으로 결과 보기
+        fn_iframe(url);
+      });
+    });
+
+    function fn_option(code, name) {
+      return '<option value="' + code + '">' + name + '</option>';
+    }
+
+    function fn_iframe(url) {
+      jQuery('#iframe').attr('src', url);
+    }
+  </script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-md navbar-light">
+    <div class="container">
+
+      <a class="navbar-brand text-info" href="{% url 'main' %}">
+        <h4 class="text-warning"><b>🐕 FindMyLostPet</b></h4>
+      </a>
+      <!--🐕🐾🐶-->
+
+      <button class="navbar-toggler navbar-toggler-right border-0" type="button" data-toggle="collapse"
+        data-target="#navbar4">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar4">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item"> <a class="nav-link" href="{% url 'main' %}">HOME</a> </li>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'about' %}">ABOUT</a> </li>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'lostList' %}">실종</a> </li>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'findList' %}">발견</a> </li>
+        </ul>
+        {% if user.is_authenticated %}
+        <ul class="navbar-nav">
+          <li class="nav-item"> <a class="nav-link text-warning"
+              href="javascript:{document.getElementById('logout').submit()}">로그아웃</a> </li>
+          <form id="logout" method="POST" action="{% url 'logout' %}">
+            {% csrf_token %} <input type="hidden" />
+          </form>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'mypage' %}">MY PAGE</a> </li>
+        </ul>
+        {% else %}
+        <ul class="navbar-nav">
+          <li class="nav-item"> <a class="nav-link text-warning" href="{% url 'login' %}">로그인</a> </li>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'register' %}">회원가입</a> </li>
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  {% block content %}
+  <!--들어갈내용-->
+  {% endblock %}
+
+  <script>
+    //강아지 종
+    obj = {
+      "AfghanHound":"아프간하운드",
+      "AlaskanMalamute":"알래스카맬러뮤트",
+      "AmericanStaffordshireTerrier":"아메리칸스태퍼드셔테리어",
+      "AustralianShepherd":"오스트레일리언셰퍼드",
+      "BassetHound":"바셋하운드",
+      "Beagle":"비글",
+      "BeardedCollie":"비어디드콜리",
+      "BedlingtonTerrier":"베들링턴테리어",
+      "BelgianMalinois":"말리노이즈",
+      "BerneseMountainDog":"버니즈마운틴도그",
+      "BichonFrise":"비숑프리제",
+      "Bloodhound":"블러드하운드",
+      "BorderCollie":"보더콜리",
+      "Borzoi":"보르조이",
+      "BostonBull":"보스턴테리어",
+      "Boxer":"복서",
+      "BoykinSpaniel":"보이킨스패니얼",
+      "Brittany":"브리트니",
+      "BullTerrier":"불테리어",
+      "Bulldog":"불독",
+      "Bullmastiff":"불마스티프",
+      "CardiganWelshCorgi":"카디건웰시코기",
+      "CavalierKingCharlesSpaniel":"카발리에킹찰스스패니얼",
+      "ChesapeakeBayRetriever":"체서피크베이리트리버",
+      "Chihuahua":"치와와",
+      "ChineseShar-Pei":"샤페이",
+      "ChowChow":"차우차우",
+      "CockerSpaniel":"코커스패니얼",
+      "Collie":"콜리",
+      "Dachshund":"닥스훈트",
+      "Dalmatian":"달마티안",
+      "DobermanPinscher":"도베르만핀셔",
+      "EnglishCockerSpaniel":"잉글리시코커스패니얼",
+      "EnglishSpringerSpaniel":"잉글리시스프링어스패니얼",
+      "EnglishToySpaniel":"잉글리시토이스패니얼",
+      "FrenchBulldog":"프렌치불독",
+      "GermanPinscher":"저먼핀셔",
+      "GermanShepherd":"저먼셰퍼드",
+      "GlenOfImaalTerrier":"글렌오브이말테리어",
+      "GoldenRetriever":"골든리트리버",
+      "GordonSetter":"고든세터",
+      "GreatPyrenees":"그레이트피레니즈",
+      "Greyhound":"그레이하운드",
+      "IbizanHound":"이비전하운드",
+      "IrishSetter":"아이리시세터",
+      "IrishTerrier":"아이리시테리어",
+      "ItalianGreyhound":"이탈리안그레이하운드",
+      "JapaneseChin":"제페니스친",
+      "Komondor":"코몬돌",
+      "LabradorRetriever":"래브라도리트리버",
+      "LhasaApso":"라사압소",
+      "Maltese":"말티즈",
+      "ManchesterTerrier":"맨체스터테리어",
+      "Mastiff":"잉글리쉬마스티프",
+      "MiniatureSchnauzer":"미니어처슈나우저",
+      "NeapolitanMastiff":"나폴리탄마스티프",
+      "NorwegianBuhund":"노르웨이안부훈트",
+      "OldEnglishSheepdog":"올드잉글리시쉽독",
+      "Papillon":"빠삐용",
+      "ParsonRussellTerrier":"파슨러셀테리어",
+      "Pekingese":"페키니즈",
+      "PembrokeWelshCorgi":"웰시코기",
+      "Pomeranian":"포메라니안",
+      "Poodle":"푸들",
+      "SaintBernard":"세인트버나드",
+      "SilkyTerrier":"실키테리어",
+      "TibetanMastiff":"티베탄마스티프",
+      "WelshSpringerSpaniel":"웰시스프링어스패니얼",
+      "YorkshireTerrier":"요크셔테리어",
+      "Sapsaree":"삽살개",
+      "Spitz":"재패니즈스피츠",
+      "ShibaInu":"시바견",
+      "ShihTzu":"시츄",
+      "SiberianHusky":"시베리안허스키",
+      "KoreaJindo":"진돗개",
+      "Pompitz":"폼피츠",
+      "ToyPoodle":"토이푸들",
+      "MiniaturePincher":"미니어쳐핀셔",
+      "Rottweiler":"로트와일러",
+      "Pug":"퍼그",
+      "Samoyed":"사모예드",
+      "ShetlandSheepdog":"셔틀랜드쉽독",
+    }
+
+  </script>
+
+
+  <script>
+    //select의 id값이 breed인 경우 호출
+    html = "";
+    for (var key in obj) {
+
+      html += "<option value=" + obj[key] + ">" + obj[key] + "</option>"
+    }
+    document.getElementById("selected_breed").innerHTML = html;
+  </script>
+
+  <div class="py-3">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <p class="mt-2 mb-0">© 2020 KAU SOFTWARE Capstone Design</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+    integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+  <script src="assets/js/validation.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="py-4">
+  <div class="container">
+    <div class="row">
+      <img class="card-img-top m-2" src="https://image.flaticon.com/icons/svg/2138/2138440.svg" style="height: 100px;">
+      <div class="text-center col-md-7 mx-auto">
+        <h2>MYPAGE</h2>
+        <p class="lead m-3">{{ user.profile.nickname }}님 환영합니다</p>
+        <div class="col-md-12 mb-3 mt-3 text-center">
+          <table class="table">
+            <tbody>
+              <tr>
+                <th scope="row">아이디</th>
+                <td>{{ user.username }}</td>
+              </tr>
+              <tr>
+                <th scope="row">연락처</th>
+                <td>{{ user.profile.phone }}</td>
+              </tr>
+              <tr>
+                <th scope="row">가입일</th>
+                <td>{{ user.date_joined }}</td>
+              </tr>
+              <tr>
+                <th scope="row">마지막 로그인</th>
+                <td>{{ user.last_login }}</td>
+              </tr>
+              <tr>
+                <th scope="row"></th>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- old code
+<div class="text-center py-4">
+  <div class="container">
+    <div class="row my-3 justify-content-center">
+      <div class="col-md-9">
+        <a href="{% url 'main' %}">
+          <img class="card-img-top" src="https://image.flaticon.com/icons/svg/2138/2138440.svg" style="height: 100px;">
+        </a>
+        <b>
+          <h1>MYPAGE</h1>
+        </b>
+        <p class="lead m-2">{{ user.profile.nickname }}님 환영합니다</p>
+      </div>
+      <div class="col-md-12 mb-3 mt-3 text-center">
+        <table class="table">
+          <tbody>
+            <tr>
+              <th scope="row">아이디</th>
+              <td>{{ user.username }}</td>
+            </tr>
+            <tr>
+              <th scope="row">연락처</th>
+              <td>{{ user.profile.phone }}</td>
+            </tr>
+            <tr>
+              <th scope="row">가입일</th>
+              <td>{{ user.date_joined }}</td>
+            </tr>
+            <tr>
+              <th scope="row">마지막 로그인</th>
+              <td>{{ user.last_login }}</td>
+            </tr>
+            <tr>
+              <th scope="row"></th>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+-->
+
+<div class="py-1 justify-content-center">
+  <div class="container">
+    <div class="container-fluid">
+      <hr>
+    </div>
+    <div>
+      <h3 class="mb-3">내가 쓴 실종공고</h3>
+    </div>
+    <div class="row mb-2">
+      {% for lostPost in lposts %}
+      <div class="col-lg-3 col-sm-6 col-xs-3 mb-2">
+        <div class="card btn-outline-light">
+          {% for dog in lostPost.dog_set.all %}
+          <a href="{% url 'lostListDetail2' lostPost.id dog.id %}" style="text-decoration:none;color:dimgray;">
+            {% if dog.photo_set.all %}
+            {% for photo in dog.photo_set.all|slice:":1" %}
+            <img class="card-img-top mx-auto" src="{{photo.Photo.url}}" style="height: 200px">
+            {% endfor %}
+            {% else %}
+            <img class="card-img-top mx-auto p-4" src="https://www.flaticon.com/svg/static/icons/svg/2965/2965072.svg"
+              style="height: 200px">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title" style="text-align: center;">{{dog.Name}}</h5>
+              <h4 class="card-title" style="text-align: center;">{{dog.Breed}}</h4>
+              <!--
+                      <p class="card-text"> 성별: {{dog.Sex}}<br>특징: {{lostPost.Text|truncatewords:3}} <br> 실종장소:
+                      {{lostPost.Si}}
+                      {{lostPost.Gu}} <br>실종시간 :
+                      {{lostPost.MissingDate}}</p>
+                      <a href="{% url 'lostListDetail2' lostPost.id dog.id %}" class="btn btn-primary">자세히보기</a>
+                    -->
+              <p class="card-text" style="text-align: center;">{{lostPost.Si}} {{lostPost.Gu}} <br>
+                {{lostPost.MissingDate}}</p>
+              <p class="card-text mx-auto mt-1" style="text-align: center;">
+                <a href="{% url 'lost_edit' lostPost.id %}">
+                  <button type="button" class="btn btn-sm btn-outline-dark" style="width: 27%;">수정</button> </a>
+                <button type="button" class="btn btn-sm btn-outline-dark" style="width: 27%;"
+                  onclick="lost_modal({{lostPost.id}})">삭제</button>
+                  <a href="{% url 'lost_similarity' lostPost.id %}">
+                  <button type="button" class="btn btn-sm btn-outline-danger" style="width: 40%;">유사공고</button></a>
+              </p>
+              <!--
+                  <div class="btn-group">
+                    <a href="{% url 'lost_edit' lostPost.id %}">
+                      <button type="button" class="btn btn-sm btn-outline-dark">수정</button> </a>
+                    <button type="button" class="btn btn-sm btn-outline-dark" data-toggle='modal' data-target='#deleteLostModal'>삭제</button>   
+                  </div>
+                -->
+              {% endfor %}
+            </div>
+        </div>
+        <script>
+          function lost_modal(lost_id) {
+
+            $('#deleteLostModal').modal('show');
+            $('#lostDelete').attr("href", "/lost_delete/" + lost_id);
+
+          }
+
+          function find_modal(find_id) {
+
+            $('#deleteFindModal').modal('show');
+            $('#findDelete').attr("href", "/find_delete/" + find_id);
+
+
+          }
+
+        </script>
+        <div class="modal fade" id="deleteLostModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">삭제</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body" id="contents">
+                실종공고를 삭제하시겠습니까?
+              </div>
+              <div class="modal-footer">
+                <a href="" id="lostDelete">
+                  <button type="button" class="btn btn-danger">Yes</button>
+                </a>
+                <button type="button" class="btn btn-light" data-dismiss="modal">No</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div>
+      <nav aria-label="...">
+        {%if lposts.paginator.num_pages > 1 %}
+        <ul class="pagination" style="justify-content: center;">
+          <li class="page-item">
+            <a class="page-link" style="color:lightslategray" href="?lpage=1&fpage={{fposts.number}}">&laquo;</a>
+          </li>
+          {% for i in lposts.paginator.page_range%}
+            {% if i >= lposts.number|add:-5 and i <= lposts.number|add:5 %}
+              {%if i == lposts.number %}
+              <li class="page-item active">
+                <a class="page-link"
+                  style="color:lightslategray; background-color: lavenderblush; border-color: gainsboro;"
+                  href="?lpage={{i}}&fpage={{fposts.number}}">{{i}} <span class="sr-only"></span></a>
+              </li>
+              {%else%}
+              <li class="page-item"><a class="page-link" style="color:lightslategray"
+                  href="?lpage={{i}}&fpage=fposts.number">{{i}}</a>
+              </li>
+              {%endif%}
+            {%endif%}
+          {%endfor%}
+          <li class="page-item">
+            <a class="page-link" style="color:lightslategray"
+              href="?lpage={{lposts.paginator.num_pages}}&fpage={{fposts.number}}">&raquo;</a>
+          </li>
+        </ul>
+      </nav>
+      {%endif%}
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="container-fluid">
+      <hr>
+    </div>
+    <div>
+      <h3 class="mb-3">내가 쓴 발견제보</h3>
+    </div>
+    <div class="row mb-2">
+      {% for findPost in fposts %}
+      <div class="col-lg-3 col-sm-6 col-xs-3 mb-2">
+        <div class="card btn-outline-light">
+          {% for dog in findPost.dog_set.all %}
+          <a href="{% url 'findListDetail2' findPost.id dog.id %}" style="text-decoration:none;color:dimgray;">
+            {% if dog.photo_set.all %}
+            {% for photo in dog.photo_set.all|slice:":1" %}
+            <img class="card-img-top mx-auto" src="{{photo.Photo.url}}" style="height: 200px">
+            {% endfor %}
+            {% else %}
+            <img class="card-img-top mx-auto p-4" src="https://www.flaticon.com/svg/static/icons/svg/2965/2965072.svg"
+              style="height: 200px">
+            {% endif %}
+            <!--
+              <h6 class="card-title" style="text-align: center; color: gray">{{dog.State}}</h6>
+              <h4 class="card-title">{{dog.Breed}}</h4>
+              <p class="card-text"> 성별: {{dog.Sex}}<br>특징: {{findPost.Text|truncatewords:3}} <br> 발견장소:
+                {{findPost.Si}}
+                {{findPost.Gu}} <br>발견시간 :
+                {{findPost.MissingDate}}</p>
+              <a href="{% url 'findListDetail2' findPost.id dog.id %}" class="btn btn-primary">자세히보기</a>
+              
+              이 내용 추가
+              <h5 class="card-title" style="text-align: center;">보관장소</h5>
+            -->
+            <div class="card-body">
+              <h5 class="card-title" style="text-align: center;">{{dog.Breed}}</h5>
+              <p class="card-text" style="text-align: center;"> {{findPost.Si}} {{findPost.Gu}} <br>
+                {{findPost.MissingDate}}</p>
+          </a>
+          <p class="card-text mx-auto mt-1" style="text-align: center;">
+            <a href="{% url 'find_edit' findPost.id %}">
+              <button type="button" class="btn btn-sm btn-outline-dark" style="width: 27%;">수정</button> </a>
+            <button type="button" class="btn btn-sm btn-outline-dark" style="width: 27%;"
+              onclick="find_modal({{findPost.id}})">삭제</button>
+            <a href="{% url 'find_similarity' findPost.id %}">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" style="width:40%;">유사공고</button></a>
+          </p>
+          {%endfor%}
+
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="deleteFindModal" tabindex="-1" role="dialog" aria-labelledby="exampleFindLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">삭제</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            발견제보를 삭제하시겠습니까?
+          </div>
+          <div class="modal-footer">
+            <a href="" id="findDelete">
+              <button type="button" class="btn btn-danger">Yes</button>
+            </a>
+            <button type="button" class="btn btn-light" data-dismiss="modal">No</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {%endfor%}
+  </div>
+  <div>
+    {%if fposts.paginator.num_pages > 1%}
+    <nav aria-label="...">
+      <ul class="pagination" style="justify-content: center;">
+        <li class="page-item">
+          <a class="page-link" style="color:lightslategray" href="?lpage={{lposts.number}}&fpage=1">&laquo;</a>
+        </li>
+        {% for i in fposts.paginator.page_range%}
+          {% if i >= fposts.number|add:-5 and i <= fposts.number|add:5 %}
+            {% if i == fposts.number %}
+            <li class="page-item active">
+              <a class="page-link" style="color:lightslategray; background-color: lavender; border-color:gainsboro;"
+                href="?lpage={{lposts.number}}&fpage={{i}}">{{i}} <span class="sr-only"></span></a>
+            </li>
+            {% else%}
+            <li class="page-item"><a class="page-link" style="color:lightslategray"
+                href="?lpage={{lposts.number}}&fpage={{i}}">{{i}}</a>
+            </li>
+            {% endif%}
+          {% endif%}
+        {%endfor%}
+        <li class="page-item">
+          <a class="page-link" style="color:lightslategray"
+            href="?lpage={{lposts.number}}&fpage={{fposts.paginator.num_pages}}">&raquo;</a>
+        </li>
+      </ul>
+    </nav>
+    {%endif%}
+  </div>
+  {% endblock %}
